@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ClearQueue — Explainable Case Prioritization</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wordmark">
+    <span class="wordmark-mark">●</span> ClearQueue
+  </div>
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-view="queue">Work queue</button>
+    <button class="tab" data-view="overview">Overview</button>
+    <button class="tab" data-view="mlcompare">ML comparison</button>
+    <button class="tab" data-view="responsible">Responsible scoring</button>
+  </nav>
+  <div class="topbar-actions">
+    <div class="sample-picker">
+      <button id="sample-menu-btn" class="btn btn-ghost">Try sample data ▾</button>
+      <div id="sample-menu" class="sample-menu hidden"></div>
+    </div>
+    <label class="btn btn-primary" for="csv-input">Upload CSV</label>
+    <input type="file" id="csv-input" accept=".csv" hidden />
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ EMPTY STATE ============ -->
+  <section id="empty-state" class="empty-state">
+    <p class="empty-kicker">No cases loaded</p>
+    <h1>Turn a spreadsheet of cases into a transparent work queue.</h1>
+    <p class="empty-body">
+      Upload a CSV with columns like <code>case_id, category, amount, days_open,
+      missing_information, urgency, dependencies</code>. ClearQueue scores every case
+      0–100 and shows exactly why — no black box.
+    </p>
+    <div class="empty-actions">
+      <label class="btn btn-primary" for="csv-input">Upload your CSV</label>
+      <button id="sample-btn-2" class="btn btn-ghost">Or try a sample dataset</button>
+    </div>
+    <p class="empty-hint muted">
+      The same engine scores insurance claims, support tickets, or maintenance
+      requests — no code changes, just different columns of the same shape.
+    </p>
+  </section>
+
+  <!-- ============ WORK QUEUE VIEW ============ -->
+  <section id="view-queue" class="view hidden">
+    <div class="queue-layout">
+      <div class="queue-list-panel">
+        <div class="queue-list-header">
+          <h2>Work queue</h2>
+          <span id="queue-count" class="muted"></span>
+        </div>
+        <div class="queue-list-actions">
+          <button id="export-queue-pdf" class="btn btn-ghost btn-small">Export PDF</button>
+        </div>
+        <div id="queue-list" class="queue-list"></div>
+      </div>
+
+      <div class="queue-detail-panel" id="detail-panel">
+        <div class="detail-empty muted">Select a case to see its full explanation.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ OVERVIEW VIEW ============ -->
+  <section id="view-overview" class="view hidden">
+    <h2>Portfolio overview</h2>
+    <div id="stat-cards" class="stat-cards"></div>
+
+    <div class="chart-row">
+      <div class="chart-block">
+        <h3>Priority distribution</h3>
+        <div id="chart-priority" class="hbar-chart"></div>
+      </div>
+      <div class="chart-block">
+        <h3>Cases by category</h3>
+        <div id="chart-category" class="hbar-chart"></div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-block">
+        <h3>Top scoring factors across all cases</h3>
+        <div id="chart-factors" class="hbar-chart"></div>
+      </div>
+      <div class="chart-block">
+        <h3>Case age distribution</h3>
+        <div id="chart-age" class="hbar-chart"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ML COMPARISON VIEW ============ -->
+  <section id="view-mlcompare" class="view hidden">
+    <h2>ML comparison</h2>
+    <p class="mlcompare-lede">
+      A separate, optional experiment: train a small gradient-boosted model
+      to reproduce the rule-based engine's own scores, then explain <em>that</em>
+      model with SHAP. This isn't a claim that the ML model is better — it's
+      a controlled check of whether a black-box model, explained after the
+      fact, actually agrees with an engine you can read line by line.
+    </p>
+    <button id="run-ml-compare" class="btn btn-primary">Run comparison on current dataset</button>
+    <div id="mlcompare-results"></div>
+  </section>
+
+  <!-- ============ RESPONSIBLE SCORING VIEW ============ -->
+  <section id="view-responsible" class="view hidden">
+    <h2>Responsible scoring</h2>
+    <p class="responsible-lede">
+      ClearQueue ranks operational work. It does not make decisions about people,
+      and it is designed so every ranking can be inspected and challenged.
+    </p>
+
+    <div class="responsible-grid">
+      <div class="responsible-card">
+        <span class="responsible-label">Model type</span>
+        <span class="responsible-value">Rule-based scoring</span>
+      </div>
+      <div class="responsible-card">
+        <span class="responsible-label">Explainability</span>
+        <span class="responsible-value">100%</span>
+      </div>
+      <div class="responsible-card">
+        <span class="responsible-label">Human review</span>
+        <span class="responsible-value">Required</span>
+      </div>
+      <div class="responsible-card">
+        <span class="responsible-label">Automated decision</span>
+        <span class="responsible-value">No</span>
+      </div>
+    </div>
+
+    <div class="responsible-columns">
+      <div>
+        <h3>What the score is</h3>
+        <p>A prioritization recommendation for operational triage — a suggestion
+        about work order, reviewed and confirmed by a person before any action
+        is taken on a case.</p>
+      </div>
+      <div>
+        <h3>What the score never uses</h3>
+        <ul id="excluded-list" class="excluded-list"></ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div id="toast" class="toast hidden"></div>
+
+<div id="mapping-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <h3>Match your columns</h3>
+    <p class="muted modal-sub">
+      Your file's headers don't already match ClearQueue's expected fields.
+      Tell us which of your columns is which — anything left as "Not present"
+      is simply skipped and marked unavailable in the scoring.
+    </p>
+    <div id="mapping-fields" class="mapping-fields"></div>
+    <div class="modal-actions">
+      <button id="mapping-cancel" class="btn btn-ghost">Cancel</button>
+      <button id="mapping-confirm" class="btn btn-primary">Score with this mapping</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
