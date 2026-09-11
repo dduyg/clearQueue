@@ -120,14 +120,19 @@ You'll land on your new (empty) Space with a **Files** tab.
    colorFrom: blue
    colorTo: gray
    sdk: gradio
-   sdk_version: 4.44.0
+   sdk_version: 6.26.0
    app_file: app.py
    pinned: false
    ---
    ```
-3. Make sure `sdk_version` matches the `gradio==` line in `requirements.txt`
-   (currently `4.44.0`) and that `app_file: app.py` is present — add it if
-   it's missing. That's the only required change.
+3. **Leave `sdk_version` exactly as Hugging Face auto-filled it.** Don't
+   change it, and don't add a `gradio` line to `requirements.txt`. Hugging
+   Face's Gradio-SDK builder installs its own gradio on top of whatever's
+   in `requirements.txt` regardless — pinning a different version there
+   causes a build-breaking dependency conflict rather than anything
+   gracefully falling back, which is exactly why this project's
+   `requirements.txt` doesn't pin `gradio` at all. Just confirm
+   `app_file: app.py` is present — add it if it's missing.
 4. Click **Commit changes to main**.
 
 ### 2.5 Watch it build
@@ -159,9 +164,11 @@ rebuild the Space automatically after you commit the change.
 - **Free tier sleep:** an idle free Space goes to sleep after a while and
   takes ~30–60 seconds to wake up on the next visit. Normal, not a bug —
   worth a one-line note wherever you share the link.
-- **If the build fails:** click the **Logs** tab on the Space page. The most
-  common cause is `sdk_version` in the README header not matching the
-  `gradio` version in `requirements.txt` — keep those two in sync.
+- **If the build fails:** click the **Logs** tab on the Space page. If it's
+  a pip dependency conflict mentioning `gradio`, `fastapi`, or `torch`, it
+  means something in `requirements.txt` got pinned to an exact version that
+  clashes with what Hugging Face's builder injects — loosen it to a `>=`
+  range instead of `==` and re-upload.
 - **Keeping GitHub and Hugging Face in sync:** these are two separate,
   independent uploads. If you change a file, you'll want to update it in
   *both* places (GitHub for the public source code, Hugging Face for the
