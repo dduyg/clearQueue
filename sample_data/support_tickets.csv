@@ -1,0 +1,21 @@
+case_id,category,amount,days_open,missing_information,urgency,dependencies
+TICKET-3001,Login Issue,0,1,false,high,0
+TICKET-3002,Billing Question,45,9,false,low,0
+TICKET-3003,Data Export Bug,0,22,true,high,3
+TICKET-3004,Feature Request,0,60,false,low,0
+TICKET-3005,Payment Failure,120,4,false,high,1
+TICKET-3006,Account Lockout,0,0,false,high,0
+TICKET-3007,Slow Performance,0,16,true,medium,0
+TICKET-3008,Integration Error,0,29,true,high,2
+TICKET-3009,Password Reset,0,1,false,medium,0
+TICKET-3010,Refund Request,80,11,false,medium,0
+TICKET-3011,API Rate Limit,0,7,false,medium,1
+TICKET-3012,Broken Link,0,45,false,low,0
+TICKET-3013,Duplicate Charge,200,3,false,high,0
+TICKET-3014,Onboarding Help,0,2,false,low,0
+TICKET-3015,Data Loss Report,0,5,true,high,1
+TICKET-3016,UI Glitch,0,33,false,low,0
+TICKET-3017,Subscription Cancel,60,14,false,medium,0
+TICKET-3018,Security Concern,0,1,true,high,2
+TICKET-3019,Export Timeout,0,19,false,medium,0
+TICKET-3020,General Question,0,8,false,low,0

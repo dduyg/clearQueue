@@ -1,0 +1,21 @@
+case_id,category,amount,days_open,missing_information,urgency,dependencies
+WO-5001,HVAC Failure,3200,2,false,high,1
+WO-5002,Leaking Roof,8500,18,false,high,2
+WO-5003,Broken Elevator,15000,5,true,high,3
+WO-5004,Light Fixture,150,40,false,low,0
+WO-5005,Plumbing Leak,1200,7,false,medium,0
+WO-5006,Fire Alarm Fault,6000,1,true,high,1
+WO-5007,Paint Touch-up,300,55,false,low,0
+WO-5008,Parking Lot Pothole,2000,25,false,medium,0
+WO-5009,Boiler Malfunction,9800,3,false,high,2
+WO-5010,Door Lock Repair,400,12,false,medium,0
+WO-5011,Window Replacement,1800,33,true,medium,0
+WO-5012,Pest Control,600,9,false,low,0
+WO-5013,Generator Service,4500,4,false,medium,1
+WO-5014,Landscaping,250,48,false,low,0
+WO-5015,Electrical Fault,7200,6,true,high,2
+WO-5016,Carpet Cleaning,350,20,false,low,0
+WO-5017,Sprinkler System,2200,14,false,medium,0
+WO-5018,Security Camera Down,1900,2,false,high,1
+WO-5019,Gutter Cleaning,180,60,false,low,0
+WO-5020,AC Unit Replacement,11000,10,false,high,0

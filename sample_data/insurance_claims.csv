@@ -1,0 +1,21 @@
+case_id,category,amount,days_open,missing_information,urgency,dependencies
+CASE-1042,Property Claim,18500,34,true,high,1
+CASE-0931,Liability Claim,4200,12,true,high,0
+CASE-1182,Auto Claim,26000,41,false,high,2
+CASE-1028,Billing Dispute,900,19,false,medium,0
+CASE-1091,Support Ticket,150,6,true,low,0
+CASE-1103,Maintenance Request,300,2,false,low,0
+CASE-1207,Property Claim,52000,8,false,medium,0
+CASE-1215,Complaint,0,45,true,medium,1
+CASE-1231,Auto Claim,7600,3,false,low,0
+CASE-1244,Liability Claim,31000,22,true,high,0
+CASE-1256,Support Ticket,80,1,false,low,0
+CASE-1268,Billing Dispute,2100,28,false,medium,1
+CASE-1279,Maintenance Request,1200,15,true,medium,0
+CASE-1284,Property Claim,9800,5,false,low,0
+CASE-1291,Auto Claim,15400,30,false,high,1
+CASE-1305,Complaint,0,3,false,low,0
+CASE-1318,Liability Claim,48000,17,false,medium,0
+CASE-1327,Support Ticket,60,25,true,medium,0
+CASE-1339,Billing Dispute,3400,9,false,low,0
+CASE-1345,Property Claim,21000,38,true,high,2
