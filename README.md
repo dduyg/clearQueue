@@ -1,50 +1,107 @@
-# ClearQueue — Explainable Case Prioritization Engine
+<div align="center">
 
-ClearQueue turns a spreadsheet of operational cases (insurance claims, support
-tickets, maintenance requests, complaints — any domain) into a transparent,
-prioritized work queue. Every score is 100% explainable: no ML black box,
-just named, weighted factors a reviewer can inspect and challenge.
+# ClearQueue
 
-**Live demo:** _add your deployed URL here once deployed_
+**An explainable case-prioritization engine for operational teams.**
+
+Upload a spreadsheet of cases. Get a transparent 0–100 priority score for
+every one of them — with a full, inspectable breakdown of *why*.
+
+[![Python](https://img.shields.io/badge/python-3.11-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/backend-FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Frontend](https://img.shields.io/badge/frontend-HTML%2FCSS%2FJS-f7df1e)](#tech-stack)
+[![License](https://img.shields.io/badge/license-MIT-lightgrey)](#license)
+[![Model type](https://img.shields.io/badge/model-rule--based%2C%20100%25%20explainable-4b9c7a)](#responsible-scoring)
+
+**[Live demo](#) · [Quickstart](#quickstart) · [How the scoring works](#how-the-scoring-works) · [Deploy your own](#deploy-your-own)**
+
+</div>
+
+---
+
+## The problem
+
+Most triage tools give a team a ranked list and ask them to trust it. When
+the ranking comes from a model no one can inspect, "trust it" is the only
+option — which makes the tool useless the moment someone asks *why is this
+case first?* and nobody can answer.
+
+ClearQueue takes the opposite position: **every point in every score is
+named, weighted, and visible.** A reviewer can see exactly which factors
+pushed a case to the top of the queue, and exactly what would bring it back
+down. It's a decision-support tool a human stays in charge of, not a
+black-box ranking they're asked to defer to.
 
 ## What it does
 
-- **Upload a CSV** of cases and get a 0–100 priority score for each one.
-- **Any column headers work**: if your CSV doesn't already use ClearQueue's
-  field names, a mapping step lets you match your columns (e.g. `Cost`,
-  `Ticket ID`, `Sev`) to the engine's expected fields before scoring.
-- **See exactly why**: every score breaks down into named factors (financial
-  impact, case age, missing information, urgency, blocking dependencies)
-  with the exact points each one contributed.
-- **Work queue**: cases sorted highest-priority-first, with a recommended
-  action ("Review today" / "Review this week" / "Monitor").
-- **Overview dashboard**: portfolio-level stats and distributions.
-- **"What if" simulation**: drag a case's amount, age, urgency, or
-  dependencies and watch the score recompute live, against the same
-  scoring engine used for the real data (not a separate approximation).
-- **PDF export**: download a one-page explanation for any case, or a
-  summary report of the whole work queue.
-- **ML comparison mode**: trains a small gradient-boosted model to
-  reproduce the rule engine's own scores, then explains it with SHAP —
-  a controlled check of whether a black-box model, explained after the
-  fact, actually agrees with an engine you can read line by line. Surfaces
-  the biggest disagreements first, which is usually the interesting part.
-- **Responsible Scoring page**: states plainly what the model is (rule-based),
-  what it excludes (all protected/personal attributes), and that it is a
-  recommendation for a human reviewer, not an automated decision.
-- **Three sample datasets** (insurance claims, support tickets, maintenance
-  requests) via the "Try sample data" menu — the same engine, unmodified,
-  scores all three domains.
+| | |
+|---|---|
+| 📤 **Upload any CSV** | `case_id`, `category`, `amount`, `days_open`, `missing_information`, `urgency`, `dependencies` — works across insurance claims, support tickets, maintenance requests, complaints, or any operational case type with this shape. |
+| 🎯 **Explainable 0–100 scoring** | Every score breaks down into five named, weighted factors, each with the exact points it contributed and a plain-language reason why. |
+| 📋 **Prioritized work queue** | Cases sorted highest-priority-first with a concrete recommended action — *Review today*, *Review this week*, or *Monitor*. |
+| 📊 **Portfolio analytics** | Priority distribution, category breakdown, top scoring factors across the dataset, and case-age distribution — the view a team lead actually needs. |
+| 🧪 **Live "what-if" simulation** | Drag a case's amount, age, urgency, or dependencies and watch the score recompute instantly — against the *same* engine that scored the real data, not a separate approximation. |
+| 🛡️ **Responsible Scoring page** | States plainly what the model is (rule-based), what it never uses (protected/personal attributes), and that every score is a recommendation for a human reviewer — never an automated decision. |
+| 🔁 **Proven cross-domain** | Three bundled sample datasets — insurance claims, support tickets, maintenance requests — score correctly through the exact same, unmodified engine. Not a claim; a click-through demo. |
 
-## Architecture
+## Screenshots
+
+> _Add 2–3 screenshots or a short GIF here once deployed — the work queue
+> view and the factor-breakdown detail panel are the two most convincing
+> shots for a portfolio._
+
+## How the scoring works
+
+Every case is scored against five independently-weighted factors that sum
+to a maximum of 100 points:
+
+| Factor | Max points | What it measures |
+|---|---|---|
+| Financial impact | 25 | Case's `amount`, normalized against the *percentile distribution of the uploaded dataset itself* — so the same engine correctly treats a €500 support ticket and a €50,000 insurance claim as "high impact" for their respective domains, with no hardcoded thresholds. |
+| Case age | 20 | Days the case has been open. |
+| Missing information | 20 | Whether required information is still outstanding. |
+| Urgency | 25 | Reported urgency level (low / medium / high). |
+| Blocking dependencies | 10 | Whether the case is blocking other work. |
+
+If a column is missing from the uploaded CSV, that factor is marked
+`unavailable` and contributes zero — the engine degrades gracefully on
+messy, partial, real-world exports instead of failing.
+
+The full logic lives in [`backend/scoring.py`](./backend/scoring.py): pure
+Python, zero framework dependencies, fully readable in one sitting.
+
+## Tech stack
+
+- **Backend:** Python, FastAPI — serves both the JSON API and the static
+  frontend from a single service.
+- **Frontend:** Plain HTML/CSS/vanilla JS — no framework, no build step, no
+  npm. Keeps the whole project deployable with nothing but Python installed.
+- **Scoring engine:** Pure Python (`dataclasses`, no dependencies) —
+  reusable outside the web app, e.g. in a notebook or batch job.
+
+No database, no auth, no build pipeline — deliberately minimal so the
+project stays easy to read end-to-end, run locally in under a minute, and
+deploy for free on a single service.
+
+## Quickstart
+
+```bash
+git clone https://github.com/YOUR-USERNAME/clearqueue.git
+cd clearqueue/backend
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+
+Open **http://localhost:8000**, click **Try sample data**, and pick any of
+the three bundled datasets.
+
+## Project structure
 
 ```
 clearqueue/
 ├── backend/
 │   ├── main.py           # FastAPI app — API routes + serves the static frontend
-│   ├── scoring.py         # Rule-based scoring engine (pure Python, framework-agnostic)
-│   ├── ml_compare.py      # ML-comparison mode (GradientBoosting + SHAP)
-│   ├── pdf_report.py      # PDF export (reportlab)
+│   ├── scoring.py         # The scoring engine (pure Python, framework-agnostic)
 │   └── requirements.txt
 ├── static/
 │   ├── index.html
@@ -54,99 +111,44 @@ clearqueue/
 │   ├── insurance_claims.csv
 │   ├── support_tickets.csv
 │   └── maintenance_requests.csv
-├── app.py                   # Hugging Face Gradio-SDK entrypoint (see deploy guides)
-├── requirements.txt          # Root deps, used by the Hugging Face Space build
-└── Dockerfile                # For Docker-capable hosts / paid HF plans
+└── Dockerfile               # For Hugging Face Spaces / any Docker host
 ```
-
-One FastAPI service serves both the API (`/api/*`) and the static frontend
-(everything else), so there's exactly one thing to deploy. The frontend has
-no build step (no npm, no bundler) — it's plain HTML/CSS/JS.
-
-The rule-based scoring engine (`scoring.py`) has zero framework dependencies
-— pure Python with dataclasses, easy to unit test or reuse elsewhere. The
-ML-comparison model in `ml_compare.py` is intentionally kept separate and
-clearly labeled: it's trained to imitate the rule engine's own output (there's
-no real historical outcome data for a demo project), so its SHAP attributions
-can be compared apples-to-apples against the rule engine's own factor
-breakdown for the same cases.
-
-## Run it locally
-
-```bash
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
-```
-
-Then open **http://localhost:8000**.
-
-Note: `requirements.txt` now includes `scikit-learn`, `shap`, and `reportlab`
-for the ML comparison and PDF export features — install takes noticeably
-longer than a minimal FastAPI app the first time, mostly because of `shap`.
 
 ## API reference
 
 | Endpoint | Method | Description |
 |---|---|---|
-| `/api/csv/preview` | `POST` | Upload a CSV → headers, sample rows, and a suggested column mapping. |
-| `/api/score` | `POST` | Upload a CSV (+ optional `mapping` field) → scored, sorted case list. |
+| `/api/score` | `POST` | Upload a CSV (`multipart/form-data`, field `file`) → scored, sorted case list. |
 | `/api/simulate` | `POST` | Recompute one case's score against edited field values. |
-| `/api/ml_compare` | `POST` | Run the ML/SHAP comparison against an already-scored case list. |
-| `/api/report/case` | `POST` | PDF explanation for one scored case. |
-| `/api/report/queue` | `POST` | PDF summary of the full work queue. |
 | `/api/samples` | `GET` | List available sample datasets. |
 | `/api/sample/{id}` | `GET` | Download a specific sample CSV. |
-| `/api/fairness` | `GET` | Responsible-scoring governance statement, as JSON. |
-
-## Deploy it for free
-
-**New to git/GitHub/deploying?** Full step-by-step walkthroughs are
-included — pick one:
-- [`GETTING_LIVE.md`](./GETTING_LIVE.md) — GitHub + Render
-- [`GETTING_LIVE_HUGGINGFACE.md`](./GETTING_LIVE_HUGGINGFACE.md) — Hugging Face Spaces (free Gradio-SDK carrier — Docker SDK is now paid-plan-only on Hugging Face)
-- [`GETTING_LIVE_BROWSER_ONLY.md`](./GETTING_LIVE_BROWSER_ONLY.md) — GitHub + Hugging Face Spaces, no terminal or Git install required
-
-Quick reference if you've done this before:
-- **Render** (recommended): root dir `backend`, build `pip install -r
-  requirements.txt`, start `uvicorn main:app --host 0.0.0.0 --port $PORT`,
-  free instance type. Free tier cold-starts after ~15 min idle (~30–60s to
-  wake).
-- **Hugging Face Spaces**: Gradio SDK, `app_file: app.py`, root
-  `requirements.txt` — see the dedicated guide above. Docker SDK works too
-  if you're on a paid HF plan (`Dockerfile` is included either way).
-- **Fly.io**: `fly launch` from `backend/`, `fly deploy`. Small always-on
-  free instance, avoids Render's cold start.
+| `/api/fairness` | `GET` | Responsible-scoring governance statement, structured as JSON. |
 
 ## Responsible scoring
 
 | | |
 |---|---|
-| Model type | Rule-based scoring (primary) |
+| Model type | Rule-based scoring |
 | Explainability | 100% |
 | Human review | Required |
 | Automated decision | No |
 
-The optional ML-comparison mode is a separate, clearly-labeled experiment —
-it never replaces the rule-based score shown in the work queue, and it's
-trained only to imitate the rule engine, not to make independent judgments.
+The score is a prioritization recommendation for operational triage — never
+an automated decision about a person. It does not use, and was designed
+from the start to exclude, name, gender, ethnicity, religion, nationality,
+health information, or postcode used as a proxy for personal
+characteristics. Full statement in-app under **Responsible scoring**.
 
-## Roadmap
+## Deploy your own
 
-- [x] Optional ML-comparison mode alongside the rule-based baseline, with
-      SHAP-based explanations.
-- [x] CSV column mapping UI, for datasets that use different header names.
-- [x] Exportable PDF report per case or per work queue.
-- [ ] Persisted work queues (currently everything is computed fresh per
-      upload — no database, by design, but a saved-session option would be
-      a natural next step).
+Three complete, free deployment paths, each with a full beginner walkthrough:
 
-## For your CV / README
+| Guide | Platform | Requires |
+|---|---|---|
+| [`GETTING_LIVE.md`](./GETTING_LIVE.md) | GitHub + Render | Git installed |
+| [`GETTING_LIVE_HUGGINGFACE.md`](./GETTING_LIVE_HUGGINGFACE.md) | Hugging Face Spaces (Docker) | Git installed |
+| [`GETTING_LIVE_BROWSER_ONLY.md`](./GETTING_LIVE_BROWSER_ONLY.md) | GitHub + Hugging Face Spaces | Nothing — browser only |
 
-> Built and deployed an explainable case-prioritization platform that scores
-> operational cases 0–100 using a transparent, auditable rule-based engine.
-> Implemented a Python/FastAPI backend, a dependency-free JS frontend, a
-> column-mapping step for arbitrary CSV schemas, live "what-if" score
-> simulation, PDF export, an ML-vs-rule-engine comparison mode using SHAP,
-> and a responsible-AI governance page documenting model transparency and
-> excluded attributes.
+## License
+
+MIT — see [`LICENSE`](./LICENSE). Free to use, fork, and adapt.
