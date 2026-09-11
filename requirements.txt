@@ -1,8 +1,16 @@
-fastapi==0.115.0
-uvicorn[standard]==0.30.6
-python-multipart==0.0.9
-scikit-learn==1.5.2
-shap==0.46.0
-numpy==1.26.4
-reportlab==4.2.5
-gradio==4.44.0
+# Deliberately loose version ranges, not exact pins.
+#
+# Hugging Face's Gradio-SDK Space builder injects its own baseline stack
+# (gradio, torch, spaces) on top of this file, at whatever version its
+# current default template uses (6.26.0 as of testing this) — regardless
+# of what we ask for. Exact pins here that don't happen to match HF's
+# injected versions cause a hard pip resolution conflict at build time
+# rather than a warning, so we don't pin fastapi/uvicorn/numpy tightly,
+# and we don't list gradio at all (HF supplies it).
+fastapi>=0.115.2,<1.0
+uvicorn[standard]>=0.30.6
+python-multipart>=0.0.9
+scikit-learn>=1.5.2
+shap>=0.46.0
+numpy>=1.26.4,<3.0
+reportlab>=4.2.5
